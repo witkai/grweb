@@ -47,7 +47,7 @@ module.exports = function (grunt) {
                         expand: true,
                         cwd: 'stencil/pages/',
                         src: '**/*.dot.html',
-                        dest: 'dist',
+                        dest: 'stencil/build',
                         ext: '.html',
                         flatten: false
                     }
@@ -109,6 +109,7 @@ module.exports = function (grunt) {
                     middleware: function (connect) {
                         return [
                             connect.static('.tmp'),
+                            connect.static('stencil/build'),
                             connect().use('/bower_components', connect.static('./bower_components')),
                             connect.static(config.app)
                         ];
@@ -145,6 +146,7 @@ module.exports = function (grunt) {
                         dot: true,
                         src: [
                             '.tmp',
+                            'stencil/build',
                             '<%= config.dist %>/*',
                             '!<%= config.dist %>/.git*',
                         ]
@@ -336,6 +338,13 @@ module.exports = function (grunt) {
                         cwd: 'bower_components/bootstrap/dist',
                         src: ['fonts/*.*'],
                         dest: '<%= config.dist %>'
+                    },
+                    {
+                        expand: true,
+                        dot: true,
+                        cwd: 'stencil/build',
+                        src: ['{,*/}*.html'],
+                        dest: '<%= config.dist %>'
                     }
                 ]
             },
@@ -424,12 +433,12 @@ module.exports = function (grunt) {
         'concat',
         'cssmin',
         'uglify',
+        'stencil',
         'copy:dist',
         'modernizr',
         'rev',
         'usemin',
-        'htmlmin',
-        'stencil'
+        'htmlmin'
     ]);
 
     grunt.registerTask('default', [
