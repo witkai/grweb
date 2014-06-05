@@ -21,6 +21,7 @@ module.exports = function (grunt) {
     // Configurable paths
     var config = {
         app: 'app',
+        tpl: 'stencil/build',
         dist: 'dist'
     };
 
@@ -58,7 +59,7 @@ module.exports = function (grunt) {
         // Watches files for changes and runs tasks based on the changed files
         watch: {
             stencil: {
-                files: ['stencil/pages/*.html'],
+                files: ['stencil/pages/*.html', 'stencil/templates/*.html'],
                 tasks: ['stencil']
             },
             bower: {
@@ -89,6 +90,7 @@ module.exports = function (grunt) {
                 },
                 files: [
                     '<%= config.app %>/{,*/}*.html',
+                    '<%= config.tpl %>/{,*/}*.html',
                     '.tmp/styles/{,*/}*.css',
                     '<%= config.app %>/images/{,*/}*'
                 ]
@@ -146,7 +148,7 @@ module.exports = function (grunt) {
                         dot: true,
                         src: [
                             '.tmp',
-                            'stencil/build',
+                            '<%= config.tpl %>',
                             '<%= config.dist %>/*',
                             '!<%= config.dist %>/.git*',
                         ]
@@ -200,7 +202,7 @@ module.exports = function (grunt) {
         // Automatically inject Bower components into the HTML file
         bowerInstall: {
             app: {
-                src: ['<%= config.app %>/index.html'],
+                src: ['<%= config.dist %>/index.html'],
                 exclude: ['bower_components/bootstrap/dist/js/bootstrap.js']
             }
         },
@@ -227,13 +229,13 @@ module.exports = function (grunt) {
             options: {
                 dest: '<%= config.dist %>'
             },
-            html: '<%= config.app %>/index.html'
+            html: '<%= config.dist %>/index.html'
         },
 
         // Performs rewrites based on rev and the useminPrepare configuration
         usemin: {
             options: {
-                assetsDirs: ['<%= config.dist %>', '<%= config.dist %>/images']
+                assetsDirs: ['<%= config.dist %>']
             },
             html: ['<%= config.dist %>/{,*/}*.html'],
             css: ['<%= config.dist %>/styles/{,*/}*.css']
@@ -292,28 +294,28 @@ module.exports = function (grunt) {
         // By default, your `index.html`'s <!-- Usemin block --> will take care of
         // minification. These next options are pre-configured if you do not wish
         // to use the Usemin blocks.
-        // cssmin: {
-        //     dist: {
-        //         files: {
-        //             '<%= config.dist %>/styles/main.css': [
-        //                 '.tmp/styles/{,*/}*.css',
-        //                 '<%= config.app %>/styles/{,*/}*.css'
-        //             ]
-        //         }
-        //     }
-        // },
-        // uglify: {
-        //     dist: {
-        //         files: {
-        //             '<%= config.dist %>/scripts/scripts.js': [
-        //                 '<%= config.dist %>/scripts/scripts.js'
-        //             ]
-        //         }
-        //     }
-        // },
-        // concat: {
-        //     dist: {}
-        // },
+        cssmin: {
+            dist: {
+                files: {
+                    '<%= config.dist %>/styles/main.css': [
+                        '.tmp/styles/{,*/}*.css',
+                        '<%= config.app %>/styles/{,*/}*.css'
+                    ]
+                }
+            }
+        },
+        uglify: {
+            dist: {
+                files: {
+                    '<%= config.dist %>/scripts/scripts.js': [
+                        '<%= config.dist %>/scripts/scripts.js'
+                    ]
+                }
+            }
+        },
+        concat: {
+            dist: {}
+        },
 
         // Copies remaining files to places other tasks can use
         copy: {
@@ -342,7 +344,7 @@ module.exports = function (grunt) {
                     {
                         expand: true,
                         dot: true,
-                        cwd: 'stencil/build',
+                        cwd: '<%= config.tpl %>',
                         src: ['{,*/}*.html'],
                         dest: '<%= config.dist %>'
                     }
@@ -398,6 +400,7 @@ module.exports = function (grunt) {
 
         grunt.task.run([
             'clean:server',
+            'stencil',
             'concurrent:server',
             'autoprefixer',
             'connect:livereload',
@@ -419,21 +422,22 @@ module.exports = function (grunt) {
             ]);
         }
 
-        grunt.task.run([
-            'connect:test',
-            'mocha'
-        ]);
+// Trouble-maker
+//        grunt.task.run([
+//            'connect:test',
+//            'mocha'
+//        ]);
     });
 
     grunt.registerTask('build', [
         'clean:dist',
+        'stencil',
         'useminPrepare',
         'concurrent:dist',
         'autoprefixer',
         'concat',
         'cssmin',
         'uglify',
-        'stencil',
         'copy:dist',
         'modernizr',
         'rev',
